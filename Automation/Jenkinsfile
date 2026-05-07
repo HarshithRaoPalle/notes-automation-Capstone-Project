@@ -24,7 +24,9 @@ pipeline {
 
             steps {
 
-                bat 'py -m venv %VENV%'
+                dir('Automation') {
+                    bat 'py -m venv %VENV%'
+                }
 
             }
         }
@@ -33,9 +35,11 @@ pipeline {
 
             steps {
 
-                bat '.\\%VENV%\\Scripts\\python -m pip install --upgrade pip'
+                dir('Automation') {
+                    bat '.\\%VENV%\\Scripts\\python -m pip install --upgrade pip'
 
-                bat '.\\%VENV%\\Scripts\\pip install -r requirements.txt'
+                    bat '.\\%VENV%\\Scripts\\pip install -r requirements.txt'
+                }
 
             }
         }
@@ -44,7 +48,9 @@ pipeline {
 
             steps {
 
-                bat 'docker-compose up -d'
+                dir('Automation') {
+                    bat 'docker compose up -d'
+                }
 
             }
         }
@@ -53,10 +59,12 @@ pipeline {
 
             steps {
                 script {
-                    def status = bat(returnStatus: true, script: '.\\%VENV%\\Scripts\\pytest -n 2 --alluredir=reports/allure-results --html=reports/report.html --self-contained-html')
-                    if (status != 0) {
-                        currentBuild.result = 'UNSTABLE'
-                        echo "Pytest exited with code ${status}. Continuing to report publishing."
+                    dir('Automation') {
+                        def status = bat(returnStatus: true, script: '.\\%VENV%\\Scripts\\pytest -n 2 --alluredir=reports/allure-results --html=reports/report.html --self-contained-html tests')
+                        if (status != 0) {
+                            currentBuild.result = 'UNSTABLE'
+                            echo "Pytest exited with code ${status}. Continuing to report publishing."
+                        }
                     }
                 }
             }
@@ -66,7 +74,9 @@ pipeline {
 
             steps {
 
-                bat 'docker-compose down'
+                dir('Automation') {
+                    bat 'docker compose down'
+                }
 
             }
         }
@@ -75,7 +85,7 @@ pipeline {
 
             steps {
 
-                allure includeProperties: false, jdk: '', results: [[path: 'reports/allure-results']]
+                allure includeProperties: false, jdk: '', results: [[path: 'Automation/reports/allure-results']]
 
             }
         }
@@ -85,13 +95,13 @@ pipeline {
 
         always {
 
-            archiveArtifacts artifacts: 'reports/*', fingerprint: true
+            archiveArtifacts artifacts: 'Automation/reports/*', fingerprint: true
 
             publishHTML([
                 allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'reports',
+                reportDir: 'Automation/reports',
                 reportFiles: 'report.html',
                 reportName: 'Automation Test Report'
             ])
