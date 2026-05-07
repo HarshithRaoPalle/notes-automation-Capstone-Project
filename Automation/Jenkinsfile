@@ -1,0 +1,112 @@
+pipeline {
+
+    agent any
+
+    environment {
+
+        VENV = "venv"
+
+    }
+
+    stages {
+
+        stage('Clone Repository') {
+
+            steps {
+
+                git branch: 'main',
+                url: 'https://github.com/HarshithRaoPalle/notes-automation.git'
+
+            }
+        }
+
+        stage('Create Virtual Environment') {
+
+            steps {
+
+                bat 'py -m venv %VENV%'
+
+            }
+        }
+
+        stage('Install Dependencies') {
+
+            steps {
+
+                bat '.\\%VENV%\\Scripts\\python -m pip install --upgrade pip'
+
+                bat '.\\%VENV%\\Scripts\\pip install -r requirements.txt'
+
+            }
+        }
+
+        stage('Start Selenium Grid') {
+
+            steps {
+
+                bat 'docker-compose up -d'
+
+            }
+        }
+
+        stage('Run Parallel Tests') {
+
+            steps {
+                script {
+                    def status = bat(returnStatus: true, script: '.\\%VENV%\\Scripts\\pytest -n 2 --alluredir=reports/allure-results --html=reports/report.html --self-contained-html')
+                    if (status != 0) {
+                        currentBuild.result = 'UNSTABLE'
+                        echo "Pytest exited with code ${status}. Continuing to report publishing."
+                    }
+                }
+            }
+        }
+
+        stage('Stop Selenium Grid') {
+
+            steps {
+
+                bat 'docker-compose down'
+
+            }
+        }
+
+        stage('Publish Allure Results') {
+
+            steps {
+
+                allure includeProperties: false, jdk: '', results: [[path: 'reports/allure-results']]
+
+            }
+        }
+    }
+
+    post {
+
+        always {
+
+            archiveArtifacts artifacts: 'reports/*', fingerprint: true
+
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'reports',
+                reportFiles: 'report.html',
+                reportName: 'Automation Test Report'
+            ])
+        }
+
+        success {
+
+            echo 'Pipeline executed successfully'
+
+        }
+
+        failure {
+
+            echo 'Pipeline execution failed'
+
+        }
+    }
+}
