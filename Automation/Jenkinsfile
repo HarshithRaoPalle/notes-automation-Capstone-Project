@@ -5,6 +5,8 @@ pipeline {
     environment {
 
         VENV = "venv"
+        EMAIL = "harsha21@gmail.com"
+        PASSWORD = "Harsha@21"
 
     }
 
