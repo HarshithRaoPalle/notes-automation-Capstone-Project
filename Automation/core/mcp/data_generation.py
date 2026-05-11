@@ -1,5 +1,3 @@
-"""Basic Longcat test data generation."""
-
 import json
 import re
 
@@ -7,7 +5,6 @@ from core.mcp.client import LongcatClient
 
 
 class TestDataGenerator:
-    """Generate test data using Longcat."""
 
     __test__ = False
 
@@ -15,7 +12,6 @@ class TestDataGenerator:
         self.llm = LongcatClient()
 
     def generate_note_data(self) -> list[dict[str, str]]:
-        """Generate note data and return it as a Python list."""
 
         prompt = """
 Generate 5 unique test notes for an API system.

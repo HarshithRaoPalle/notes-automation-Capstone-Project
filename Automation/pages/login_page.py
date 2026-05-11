@@ -12,9 +12,9 @@ logger = get_logger()
 
 class LoginPage(BasePage):
 
-    # =========================
+    
     # LOCATORS
-    # =========================
+    
 
     OPEN_LOGIN = (
         By.XPATH,
@@ -46,9 +46,9 @@ class LoginPage(BasePage):
         "[data-testid='alert-message']"
     )
 
-    # =========================
+    
     # METHODS
-    # =========================
+    
 
     def login(self, email, password):
 

@@ -1,4 +1,4 @@
-"""Reusable retry support for flaky Selenium actions."""
+
 
 from functools import wraps
 from time import sleep
@@ -63,6 +63,6 @@ def retry_on_flaky_action(
 
             return func(*args, **kwargs)
 
-        return wrapper  # type: ignore[return-value]
+        return wrapper  
 
     return decorator

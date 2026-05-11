@@ -1,5 +1,3 @@
-"""Longcat helper for improving Selenium locators."""
-
 from core.mcp.client import LongcatClient
 from utils.logger import get_logger
 
@@ -12,7 +10,6 @@ def suggest_locator(
     failed_locator: tuple[str, str],
     client: LongcatClient | None = None,
 ) -> str:
-    """Ask Longcat to suggest better Selenium locators for a failed element."""
 
     prompt = f"""
 Suggest stable Selenium locators for this failed locator.
@@ -28,4 +25,5 @@ Prefer data-testid, id, name, and accessible labels when present.
 """.strip()
 
     logger.info("Requesting Longcat locator suggestions for: %s", failed_locator)
+
     return (client or LongcatClient()).ask_longcat(prompt)

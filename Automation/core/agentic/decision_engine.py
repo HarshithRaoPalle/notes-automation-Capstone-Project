@@ -1,4 +1,3 @@
-"""Simple retry decisions for Selenium failures."""
 
 from enum import Enum
 
